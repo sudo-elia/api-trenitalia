@@ -1,0 +1,22 @@
+{
+  "name": "@sudo-elia/api-trenitalia",
+  "version": "1.0.0",
+  "description": "api for trenitalia",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc"
+  },
+  "keywords": [
+    "trenitalia",
+    "api"
+  ],
+  "author": "sudo-elia",
+  "license": "ISC",
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "rxjs": "^7.8.2",
+    "typescript": "^5.8.3"
+  }
+}
