@@ -3,4 +3,3 @@ dist/
 *.log
 .env
 .npmrc
-package-lock.json
