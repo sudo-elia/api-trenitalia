@@ -1,5 +1,11 @@
 import { map, Observable } from "rxjs";
 import { ajax } from "rxjs/ajax";
+import {
+  AccessTokenResponse,
+  library,
+  QuerySolutions,
+  SolutionsResponse,
+} from "./types";
 
 export class TrenitaliaAPI {
   #accessToken: string | null = null;
@@ -8,81 +14,121 @@ export class TrenitaliaAPI {
   constructor() {}
 
   /**
+   * Logs in to the Trenitalia API and retrieves access and refresh tokens.
    *
-   * @param userName
-   * @param password
-   * @param company
-   * @returns Observable with access and refresh tokens
+   * @param library - The library to use for the request, either 'rxjs' or 'fetch'.
+   * @param request
+   * @returns
    */
-  public login(
-    userName: string,
-    password: string,
-    company: string = ""
-  ): Observable<{ access_token: string; refresh_token: string }> {
-    return ajax
-      .post(
-        `https://www.lefrecce.it/PicoAuth/api/auth/login`,
-        { userName, password, company },
-        {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          Referer: "https://www.lefrecce.it/Channels.Website.WEB/it/",
-        }
-      )
-      .pipe(
+  login(
+    library: library = "rxjs",
+    request: {
+      userName: string;
+      password: string;
+      company: string;
+    }
+  ): Observable<AccessTokenResponse> | Promise<AccessTokenResponse> {
+    const url = "https://www.lefrecce.it/PicoAuth/api/auth/login";
+    const headers = {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      Referer: "https://www.lefrecce.it/Channels.Website.WEB/it/",
+    };
+    const assignDataAndReturn = (data: AccessTokenResponse) => {
+      this.#accessToken = data.access_token;
+      this.#refreshToken = data.refresh_token;
+      return data;
+    };
+    if (library === "rxjs") {
+      return ajax.post(url, request, headers).pipe(
         map((res) => {
-          const { access_token, refresh_token } = res.response as {
-            access_token: string;
-            refresh_token: string;
-          };
-          this.#accessToken = access_token;
-          this.#refreshToken = refresh_token;
-          return { access_token, refresh_token };
+          const accessData = res.response as AccessTokenResponse;
+          return assignDataAndReturn(accessData);
         })
       );
-  }
-
-  public loginWithFetch(
-    userName: string,
-    password: string,
-    company: string = ""
-  ) {
-    return fetch("https://www.lefrecce.it/PicoAuth/api/auth/login", {
+    }
+    return fetch(url, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-        Referer: "https://www.lefrecce.it/Channels.Website.WEB/it/",
-      },
-      body: JSON.stringify({ userName, password, company }),
+      headers,
+      body: JSON.stringify(request),
     }).then((response) =>
       response
         .json()
-        .then(({ access_token, refresh_token }) => ({
-          access_token,
-          refresh_token,
-        }))
-        .then(({ access_token, refresh_token }) => {
-          this.#accessToken = access_token;
-          this.#refreshToken = refresh_token;
-          return { access_token, refresh_token };
-        })
+        .then(({ access_token, refresh_token }) =>
+          assignDataAndReturn({ access_token, refresh_token })
+        )
     );
   }
 
-  getAccessToken() {
-    return this.#accessToken;
-  }
+  /**
+   * Fetches travel solutions based on the provided query.
+   *
+   * @param library - The library to use for the request, either 'rxjs' or 'fetch'.
+   * @param bodyRequest - The query parameters for fetching solutions.
+   * @returns An observable or promise of SolutionsResponse.
+   */
+  getSolutions(
+    library: library = "rxjs",
+    bodyRequest: QuerySolutions
+  ): Observable<SolutionsResponse> | Promise<SolutionsResponse> {
+    const parseBodyRequest = (request: QuerySolutions) => {
+      const { fromDate, searchType, code, toDate, travelGroup } = request;
+      const isValidDate = (date: string) =>
+        /^(\d{2})\/(\d{2})\/(\d{4})$/.test(date);
 
-  getRefreshToken() {
-    return this.#refreshToken;
-  }
+      if (!isValidDate(fromDate) || !isValidDate(toDate)) {
+        throw new Error("Invalid date format. Use 'DD/MM/YYYY'.");
+      }
+      if (
+        searchType !== "DEPARTURE_DATE" &&
+        searchType !== "PURCHASE_DATE" &&
+        searchType !== "PNR"
+      ) {
+        throw new Error(
+          "Invalid search type. Use 'DEPARTURE_DATE', 'PURCHASE_DATE', or 'PNR'."
+        );
+      }
+      if (travelGroup !== "TICKET") {
+        throw new Error("Invalid travel group. Use 'TICKET'.");
+      }
+      if (searchType === "PNR" && !code) {
+        throw new Error("Code is required when searchType is 'PNR'.");
+      }
+      if (searchType !== "PNR" && code) {
+        throw new Error(
+          "Code should not be provided when searchType is not 'PNR'."
+        );
+      }
 
-  getUserTicketsInformation() {
+      return {
+        fromDate: fromDate,
+        searchType: searchType,
+        limit: 10,
+        offset: 0,
+        code: code || "",
+        toDate: toDate,
+        travelGroup: travelGroup,
+      };
+    };
+
+    if (library === "rxjs")
+      return ajax
+        .post<SolutionsResponse>(
+          "https://www.lefrecce.it/Channels.Website.BFF.WEB/website/travel/solutions",
+          parseBodyRequest(bodyRequest),
+          {
+            Authorization: `Bearer ${this.#accessToken}`,
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          }
+        )
+        .pipe(map((response) => response.response));
+
     return fetch(
-      "https://www.lefrecce.it/Channels.Website.BFF.WEB/website/travel/next/solutions?travelGroup=TICKET",
+      "https://www.lefrecce.it/Channels.Website.BFF.WEB/website/travel/solutions",
       {
         method: "POST",
+        body: JSON.stringify(parseBodyRequest(bodyRequest)),
         headers: {
           Authorization: `Bearer ${this.#accessToken}`,
           "Content-Type": "application/json",
@@ -92,5 +138,23 @@ export class TrenitaliaAPI {
     )
       .then((response: Response) => response.json())
       .catch((error: unknown) => console.error(error));
+  }
+
+  /**
+   * Returns the access token.
+   *
+   * @returns The access token.
+   */
+  getAccessToken(): string | null {
+    return this.#accessToken;
+  }
+
+  /**
+   * Returns the refresh token.
+   *
+   * @returns The refresh token.
+   */
+  getRefreshToken() : string | null {
+    return this.#refreshToken;
   }
 }
