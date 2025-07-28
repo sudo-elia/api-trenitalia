@@ -1,5 +1,19 @@
+import { Observable } from "rxjs";
 
-export type library = 'rxjs' | 'fetch';
+export type LibraryType = 'fetch' | 'rxjs';
+
+export interface ITrenitaliaAPI<T extends Promise<any> | Observable<any>> {
+  login(request: {
+    userName: string;
+    password: string;
+    company?: string;
+  }): T extends Promise<any> ? Promise<AccessTokenResponse> : Observable<AccessTokenResponse>;
+
+  getSolutions(bodyRequest: QuerySolutions): T extends Promise<any> ? Promise<SolutionsResponse> : Observable<SolutionsResponse>;
+
+  getAccessToken(): string | null;
+  getRefreshToken(): string | null;
+}
 
 export interface AccessTokenResponse {
   access_token: string;
@@ -26,9 +40,6 @@ export interface Solution {
   date: string;
 }
 
-/**
- * It includes an array of solutions and an array of favourites.
- */
 export interface SolutionsResponse {
   solutions: Solution[];
   favourites: any[];
@@ -40,4 +51,4 @@ export interface QuerySolutions {
     code?: string; 
     toDate: string; 
     travelGroup: "TICKET";
-} 
+}

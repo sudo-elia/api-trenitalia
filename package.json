@@ -2,13 +2,13 @@
   "name": "@sudo-elia/api-trenitalia",
   "version": "1.0.0",
   "description": "api for trenitalia",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "main": "./dist/api-factory.js",
+  "types": "./dist/api-factory.d.ts",
   "files": [
     "dist"
   ],
   "scripts": {
-    "build": "tsup src/index.ts --dts --minify --format esm,cjs"
+    "build": "tsup src/api-factory.ts --dts --minify --format esm,cjs"
   },
   "keywords": [
     "trenitalia",
