@@ -2,7 +2,11 @@
   "name": "@sudo-elia/api-trenitalia",
   "version": "1.0.0",
   "description": "api for trenitalia",
-  "main": "dist/index.js",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsup src/index.ts --dts --minify --format esm,cjs"
   },
@@ -12,14 +16,11 @@
   ],
   "author": "sudo-elia",
   "license": "ISC",
-  "files": [
-    "dist"
-  ],
-  "dependencies": {
-    "rxjs": "^7.8.2",
-    "typescript": "^5.8.3"
+  "peerDependencies": {
+    "rxjs": "^7.8.2"
   },
   "devDependencies": {
+    "typescript": "^5.8.3",
     "tsup": "^8.5.0"
   },
   "optionalDependencies": {

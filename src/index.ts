@@ -10,8 +10,15 @@ import {
 export class TrenitaliaAPI {
   #accessToken: string | null = null;
   #refreshToken: string | null = null;
+  #libraryType: library;
 
-  constructor() {}
+
+  constructor(libraryType: library = "rxjs") {
+    if (libraryType !== "rxjs" && libraryType !== "fetch") {
+      throw new Error("Invalid library type. Use 'rxjs' or 'fetch'.");
+    }
+    this.#libraryType = libraryType;
+  }
 
   /**
    * Logs in to the Trenitalia API and retrieves access and refresh tokens.
@@ -21,7 +28,6 @@ export class TrenitaliaAPI {
    * @returns
    */
   login(
-    library: library = "rxjs",
     request: {
       userName: string;
       password: string;
@@ -39,7 +45,7 @@ export class TrenitaliaAPI {
       this.#refreshToken = data.refresh_token;
       return data;
     };
-    if (library === "rxjs") {
+    if (this.#libraryType === "rxjs") {
       return ajax.post(url, request, headers).pipe(
         map((res) => {
           const accessData = res.response as AccessTokenResponse;
@@ -68,7 +74,6 @@ export class TrenitaliaAPI {
    * @returns An observable or promise of SolutionsResponse.
    */
   getSolutions(
-    library: library = "rxjs",
     bodyRequest: QuerySolutions
   ): Observable<SolutionsResponse> | Promise<SolutionsResponse> {
     const parseBodyRequest = (request: QuerySolutions) => {
@@ -111,7 +116,7 @@ export class TrenitaliaAPI {
       };
     };
 
-    if (library === "rxjs")
+    if (this.#libraryType === "rxjs")
       return ajax
         .post<SolutionsResponse>(
           "https://www.lefrecce.it/Channels.Website.BFF.WEB/website/travel/solutions",
