@@ -19,29 +19,21 @@ A TypeScript/JavaScript API client for Trenitalia.
 npm install @sudo-elia/api-trenitalia
 ```
 
-## Usage
-
-### RxJS (Observable) Example
+## Usage Example
 
 ```typescript
-import { TrenitaliaAPI } from '@sudo-elia/api-trenitalia';
+import { trenitaliaAPI } from './api-factory';
 
-const api = new TrenitaliaAPI();
-api.login('username', 'password').subscribe(tokens => {
-  console.log('Access Token:', tokens.access_token);
-  console.log('Refresh Token:', tokens.refresh_token);
-});
-```
+const apiFetch = trenitaliaAPI('fetch');
+apiFetch.login({ userName: 'user', password: 'pwd' })
+  .then(data => console.log('Login with Fetch:', data))
+  .catch(error => console.error(error));
 
-### Fetch (Promise) Example
 
-```typescript
-import { TrenitaliaAPI } from '@sudo-elia/api-trenitalia';
-
-const api = new TrenitaliaAPI();
-api.loginWithFetch('username', 'password').then(tokens => {
-  console.log('Access Token:', tokens.access_token);
-  console.log('Refresh Token:', tokens.refresh_token);
+const apiRxjs = trenitaliaAPI('rxjs');
+apiRxjs.login({ userName: 'user', password: 'pwd' }).subscribe({
+  next: data => console.log('Login with RxJS:', data),
+  error: error => console.error(error)
 });
 ```
 
@@ -49,22 +41,26 @@ api.loginWithFetch('username', 'password').then(tokens => {
 
 ### `TrenitaliaAPI`
 
-#### Methods
+### Methods
 
-- **login(userName: string, password: string, company?: string): Observable<{ access_token: string; refresh_token: string }>**
-  - Logs in using RxJS Observable. Emits access and refresh tokens.
-
-- **loginWithFetch(userName: string, password: string, company?: string): Promise<{ access_token: string; refresh_token: string }>**
-  - Logs in using Fetch API. Returns a Promise with access and refresh tokens.
-
-- **getAccessToken(): string | null**
-  - Returns the current access token.
-
-- **getRefreshToken(): string | null**
-  - Returns the current refresh token.
-
-- **getUserTicketsInformation(): Promise<any>**
-  - Retrieves the user's ticket information. Requires a valid access token.
+#### Login
+  - ```typescript
+    login(userName: string, password: string, company?: string): Observable<AccessTokenResponse>
+    
+    loginWithFetch(userName: string, password: string, company?: string): Promise<AccessTokenResponse>
+    ```
+#### Get User Tickets Information
+  - ```typescript
+    getUserTicketsInformation(bodyRequest: QuerySolutions): Promise<SolutionsResponse>
+    getUserTicketsInformation(bodyRequest: QuerySolutions): Observable<SolutionsResponse>
+### Access Tokens
+  - ```typescript
+    getAccessToken(): string | null
+    ```
+### Refresh Tokens
+  - ```typescript
+    getRefreshToken(): string | null
+    ```
 
 ## Contributing
 
