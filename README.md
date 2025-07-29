@@ -22,7 +22,7 @@ npm install @sudo-elia/api-trenitalia
 ## Usage Example
 
 ```typescript
-import { trenitaliaAPI } from './api-factory';
+import { trenitaliaAPI } from '@sudo-elia/api-trenitalia';
 
 const apiFetch = trenitaliaAPI('fetch');
 apiFetch.login({ userName: 'user', password: 'pwd' })
