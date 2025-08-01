@@ -2,6 +2,12 @@
   "name": "@sudo-elia/api-trenitalia",
   "version": "1.0.1",
   "description": "api for trenitalia",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sudo-elia/api-trenitalia/",
+    "directory": "api-trenitalia"
+  },
+  "homepage": "https://github.com/sudo-elia/api-trenitalia/#readme",
   "main": "./dist/api-factory.js",
   "types": "./dist/api-factory.d.ts",
   "files": [
