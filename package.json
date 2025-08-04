@@ -2,13 +2,21 @@
   "name": "@sudo-elia/api-trenitalia",
   "version": "1.0.1",
   "description": "api for trenitalia",
-  "main": "./dist/api-factory.js",
-  "types": "./dist/api-factory.d.ts",
+  "main": "./dist/cjs/api-factory.js",
+  "module": "./dist/esm/api-factory.js",
+  "types": "./dist/esm/api-factory.d.ts",
   "files": [
-    "dist"
+    "dist/cjs",
+    "dist/esm"
   ],
+  "exports": {
+    "import": "./dist/esm/api-factory.js",
+    "require": "./dist/cjs/api-factory.js"
+  },
   "scripts": {
-    "build": "tsup src/api-factory.ts --dts --minify --format esm,cjs"
+    "build:cjs": "tsup src/api-factory.ts --dts --format cjs --out-dir dist/cjs",
+    "build:esm": "tsup src/api-factory.ts --dts --format esm --out-dir dist/esm",
+    "build": "npm run build:cjs && npm run build:esm"
   },
   "keywords": [
     "trenitalia",
