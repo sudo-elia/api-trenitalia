@@ -3,4 +3,4 @@ updates:
   - package-ecosystem: "npm" # Questo dice a Dependabot di monitorare le dipendenze npm
     directory: "/" # Se il tuo package.json è nella root della repository, usa "/"
     schedule:
-      interval: "weekly" # Dependabot controllerà gli aggiornamenti ogni settimana
+      interval: "monthly" # Dependabot controllerà gli aggiornamenti ogni settimana

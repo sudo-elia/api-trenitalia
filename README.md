@@ -31,10 +31,14 @@ apiFetch.login({ userName: 'user', password: 'pwd' })
 
 
 const apiRxjs = trenitaliaAPI('rxjs');
-apiRxjs.login({ userName: 'user', password: 'pwd' }).subscribe({
-  next: data => console.log('Login with RxJS:', data),
-  error: error => console.error(error)
-});
+apiRxjs.login({ userName: 'user', password: 'pwd' })
+.pipe(
+  takeUntil(#destroy$),
+  catchError(err => {
+    console.error(error);
+    return of(error);
+  })
+.subscribe(data => console.log('Login with RxJS:', data));
 ```
 
 ## API
